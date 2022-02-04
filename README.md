@@ -24,7 +24,7 @@
     ├── data
     │   ├── model
     │   │   ├── ImageModel.kt               - Image model
-    │   │   ├── ProductModel.kt             - Product model with 
+    │   │   ├── ProductModel.kt             - Product model 
     │   │   └── ProductVariant.kt           - Product variant model
     │   └── repository                      
     │       ├── AddProductRepository.kt     - Upload and save info to DB
@@ -58,7 +58,7 @@
         └── Response.kt                     - To handling DB operation response
 ```
 
-### Used technology and dependency
+### Used technologys and dependencys
  ---
 
 - Database      - Firebase realtime database
@@ -66,7 +66,7 @@
 - Language      - Kotlin                   
 - Architecture  - MVVM      
 
-Dependency
+Dependencys
 -  firebase-storage     - To get storage access.
 -  firebase-database    - To get database access.
 -  viewmodel            - It will help to store and manage UI-related data in a lifecycle conscious way.
