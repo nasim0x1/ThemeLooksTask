@@ -1,13 +1,11 @@
 package themelooks.test.task.ui.view.user
 
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.graphics.Paint
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
@@ -16,20 +14,31 @@ import themelooks.test.task.data.model.ImageModel
 import themelooks.test.task.data.model.ProductModel
 import themelooks.test.task.data.model.ProductVariant
 import themelooks.test.task.databinding.ActivityProductDetailsBinding
-import themelooks.test.task.ui.adaper.SmallImageAdapter
+import themelooks.test.task.ui.adapter.SmallImageAdapter
+import themelooks.test.task.ui.adapter.productDes.ColorAdapter
+import themelooks.test.task.ui.adapter.productDes.SizeAdapter
 import themelooks.test.task.ui.viewmodel.ProductDetailsViewModel
 import themelooks.test.task.util.Constants
-import themelooks.test.task.util.RecyclerViewItemClickInterface
+import themelooks.test.task.util.interfaces.SizeInterface
+import themelooks.test.task.util.interfaces.Imageinterface
 import themelooks.test.task.util.Task
+import themelooks.test.task.util.interfaces.ColorInterface
 
-class ProductDetails : AppCompatActivity(), RecyclerViewItemClickInterface {
+class ProductDetails : AppCompatActivity(), Imageinterface,
+    SizeInterface, ColorInterface {
 
-    lateinit var viewModel: ProductDetailsViewModel
+    private lateinit var viewModel: ProductDetailsViewModel
     lateinit var binding: ActivityProductDetailsBinding
     private val productsImages = ArrayList<ImageModel>()
+
+    // adapters
+    private lateinit var sizeAdapter: SizeAdapter
+    lateinit var colorAdapter: ColorAdapter
     lateinit var smallImageAdapter: SmallImageAdapter
+
     private var currentImagePos = 0
 
+    // helper maps
     private var colorMap: MutableMap<String, MutableList<String>> = HashMap()
     private var sizeMap: MutableMap<String, MutableList<String>> = HashMap()
     private var priceMap: MutableMap<String, Float> = HashMap()
@@ -37,6 +46,7 @@ class ProductDetails : AppCompatActivity(), RecyclerViewItemClickInterface {
     private var selectedSize = ""
     private var selectedColor = ""
     private var selectedVariantPrice = 0f
+
     private var currentQty = 1
     private var priceRange = ""
 
@@ -46,21 +56,22 @@ class ProductDetails : AppCompatActivity(), RecyclerViewItemClickInterface {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        // app bar back icon handler
         binding.backArrow.setOnClickListener {
             onBackPressed()
         }
 
         viewModel = ViewModelProvider(this)[ProductDetailsViewModel::class.java]
 
-        //  after fetching data from database it will observe
+        //  after fetched data from database or failed it will observe
         viewModel.productDetails.observe(this, Observer { task ->
             when (task) {
                 is Task.Loading -> {
                     binding.shimmerLayout.startShimmer()
-
                 }
                 is Task.Failed -> {
-
+                    binding.shimmerLayout.stopShimmer()
+                    Toast.makeText(this, task.message, Toast.LENGTH_SHORT).show()
                 }
                 is Task.Success -> {
                     setView(task.data)
@@ -68,65 +79,29 @@ class ProductDetails : AppCompatActivity(), RecyclerViewItemClickInterface {
             }
         })
 
-
-        // small images recyclerview buttons to change top imageview
+        // small images slider recyclerview buttons to change top imageview
+        // right site small button click handler
         binding.imageNext.setOnClickListener {
             currentImagePos += 1
             updateImageButtons()
         }
+        //left site small button click handler
         binding.imagePre.setOnClickListener { v ->
             currentImagePos -= 1
             updateImageButtons()
         }
 
-
-        binding.sizeM.setOnClickListener {
-            binding.sizeM.setBackgroundResource(R.drawable.text_button_clicked)
-            binding.sizeL.setBackgroundResource(R.drawable.text_button)
-
-            if (selectedSize != "" && selectedSize != "M") {
-                clearColorsButton()
-            }
-            selectedSize = "M"
-            buttonUpdater()
-        }
-        binding.sizeL.setOnClickListener {
-            binding.sizeL.setBackgroundResource(R.drawable.text_button_clicked)
-            binding.sizeM.setBackgroundResource(R.drawable.text_button)
-
-            if (selectedSize != "" && selectedSize != "L"){
-                clearColorsButton()
-            }
-            selectedSize = "L"
-            buttonUpdater()
-        }
-
-        binding.colorWihte.setOnClickListener {
-            if (selectedSize != "") {
-                selectedColor = "White"
-                setPrice()
-                binding.colorWihte.setBackgroundResource(R.drawable.text_button_clicked)
-                binding.colorBlack.setBackgroundResource(R.drawable.text_button)
-            } else {
-                Toast.makeText(this, "First select size!", Toast.LENGTH_SHORT).show()
-            }
-
-        }
-        binding.colorBlack.setOnClickListener {
-            if (selectedSize != "") {
-                selectedColor = "Black"
-                setPrice()
-                binding.colorBlack.setBackgroundResource(R.drawable.text_button_clicked)
-                binding.colorWihte.setBackgroundResource(R.drawable.text_button)
-            } else {
-                Toast.makeText(this, "First select size!", Toast.LENGTH_SHORT).show()
-            }
-
-        }
+        // quantity button disable cause by default color or size not selected
         binding.qDecrease.isEnabled = false
         binding.qIncrease.isEnabled = false
-        binding.qIncrease.setOnClickListener {
 
+        //slider pre and next button disabling
+        binding.imageNext.isClickable = false
+        binding.imagePre.isClickable = false
+
+
+        // quality + button handler
+        binding.qIncrease.setOnClickListener {
             currentQty += 1
             binding.qDecrease.isEnabled = true
             binding.pQuantity.text = currentQty.toString()
@@ -139,6 +114,7 @@ class ProductDetails : AppCompatActivity(), RecyclerViewItemClickInterface {
 
 
         }
+        // quality - button handler
         binding.qDecrease.setOnClickListener {
             currentQty -= 1
             if (currentQty > 1) {
@@ -158,38 +134,20 @@ class ProductDetails : AppCompatActivity(), RecyclerViewItemClickInterface {
 
     }
 
-    private fun clearColorsButton() {
-
-        binding.price.text = priceRange
-        binding.actPrice.visibility = View.GONE
-
-        binding.colorWihte.setBackgroundResource(R.drawable.text_button)
-        binding.colorBlack.setBackgroundResource(R.drawable.text_button)
-        selectedColor = ""
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun setPrice() {
-        val key = selectedColor + selectedSize
-        binding.price.text = "৳${priceMap[key]}"
-        binding.actPrice.paintFlags = binding.actPrice.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-        binding.actPrice.text = "৳" + (priceMap[key]!! + 50).toString()
-        binding.actPrice.visibility = View.VISIBLE
-        selectedVariantPrice = priceMap[key]!!.toFloat()
-        binding.qIncrease.isEnabled = true
-        binding.qIncrease.setImageResource(R.drawable.ic_add_black_24)
-    }
-
     override fun onStart() {
         super.onStart()
+        // product id
         val key: String = intent.getStringExtra("key").toString()
+
         if (key.equals(null)) {
             Toast.makeText(this, "Product not found!", Toast.LENGTH_SHORT).show()
             finish()
         }
+        // calling viewmodel function to get data from repository
         viewModel.getProductDetails(key)
     }
 
+    // it will call when product details model ready
     private fun setView(productModel: ProductModel?) {
         val images = productModel?.images
         binding.title.text = productModel!!.title
@@ -199,22 +157,30 @@ class ProductDetails : AppCompatActivity(), RecyclerViewItemClickInterface {
 
         images.let { imgList ->
             productsImages.addAll(imgList!!)
-            Glide.with(this).load(imgList[0].url).into(binding.selectedPhoto)
+            Glide.with(this).load(imgList[0].url).placeholder(R.drawable.loading).into(binding.selectedPhoto)
             smallImageAdapter = SmallImageAdapter(this, imgList, this)
             binding.productImageList.adapter = smallImageAdapter
+            smallImageAdapter.setSelectedFrame(0)
+            if (imgList.size > 1){
+                binding.imageNext.isClickable = true
+                binding.imageNext.setBackgroundResource(R.drawable.circle)
+            }
+
         }
         binding.shimmerLayout.stopShimmer()
         binding.shimmerLayout.visibility = View.GONE
         binding.detailsView.visibility = View.VISIBLE
     }
 
-    override fun onClick(position: Int) {
+    // interface method - click SmallImageAdapter item
+    override fun onImageClick(position: Int) {
         currentImagePos = position
-        Glide.with(this).load(productsImages[position].url).into(binding.selectedPhoto)
+        Glide.with(this).load(productsImages[position].url).placeholder(R.drawable.loading).into(binding.selectedPhoto)
         binding.productImageList.scrollToPosition(position)
         updateImageButtons()
     }
 
+    // image gallery next and pre button handler
     private fun updateImageButtons() {
         if (currentImagePos == 0) {
             binding.imagePre.isClickable = false
@@ -232,59 +198,108 @@ class ProductDetails : AppCompatActivity(), RecyclerViewItemClickInterface {
             binding.imageNext.setBackgroundResource(R.drawable.circle)
         }
 
-        Glide.with(this).load(productsImages[currentImagePos].url).into(binding.selectedPhoto)
+        Glide.with(this).load(productsImages[currentImagePos].url).placeholder(R.drawable.loading).into(binding.selectedPhoto)
         binding.productImageList.scrollToPosition(currentImagePos)
+        smallImageAdapter.setSelectedFrame(currentImagePos)
     }
 
+    // it will map all variant in helper Hashmap
     private fun variantFormatter(variant: List<ProductVariant>) {
         priceRange = Constants.getPriceRange(variant)
         binding.price.text = priceRange
         variant.forEach {
-            // mapping  colors
+            // mapping sizes base on color(key)
             if (colorMap.containsKey(it.color.toString())) {
                 colorMap[it.color.toString()]?.add(it.size.toString())
             } else {
-                colorMap[it.color.toString()] = mutableListOf(it.color.toString())
+                colorMap[it.color.toString()] = mutableListOf(it.size.toString())
             }
-            // mapping sizes
+            // mapping color base on sizes(key)
             if (sizeMap.containsKey(it.size.toString())) {
                 sizeMap[it.size.toString()]?.add(it.color.toString())
             } else {
                 sizeMap[it.size.toString()] = mutableListOf(it.color.toString())
             }
-            // mapping price
+            // mapping price color+size(key)
             priceMap[it.color + it.size] = it.price!!.toFloat()
 
         }
-        if ("M" !in sizeMap.keys) {
-            binding.sizeM.visibility = View.GONE
-        }
-        if ("L" !in sizeMap.keys) {
-            binding.sizeL.visibility = View.GONE
-        }
-        if ("White" !in colorMap.keys) {
-            binding.colorWihte.visibility = View.GONE
-        }
-        if ("Black" !in colorMap.keys) {
-            binding.colorBlack.visibility = View.GONE
-        }
+
+        sizeAdapter = SizeAdapter(this, ArrayList(sizeMap.keys), this)
+
+        colorAdapter = ColorAdapter(this, ArrayList(colorMap.keys), this)
+
+
+        binding.productColors.adapter = colorAdapter
+        binding.productSizes.adapter = sizeAdapter
+
     }
 
-    private fun buttonUpdater() {
-        if (selectedSize != "") {
-            if (sizeMap[selectedSize]!!.contains("Black")) {
-                binding.colorBlack.visibility = View.VISIBLE
-            } else {
-                binding.colorBlack.visibility = View.GONE
-            }
-            if (sizeMap[selectedSize]!!.contains("White")) {
-                binding.colorWihte.visibility = View.VISIBLE
-            } else {
-                binding.colorWihte.visibility = View.GONE
+    // interface method - click SizeAdapter item
+    override fun onSizeClicked(name: String, position: Int) {
+        if (selectedSize != name) {
 
+            sizeAdapter.updateFrame(position)
+            colorAdapter.updateFrame(-1)
+
+            binding.selectedColorText.visibility =View.GONE
+            selectedColor = ""
+            selectedVariantPrice = 0f
+            updatePrice()
+
+            selectedSize = name
+
+            if (sizeMap.containsKey(name)) {
+                val colors = sizeMap[name]
+                colorAdapter.updateList(colors!!)
+
+            } else {
+                Toast.makeText(this, "Color not found", Toast.LENGTH_SHORT).show()
             }
         }
 
+    }
+
+    // interface method - click ColorAdapter item
+    override fun onColorClicked(name: String, position: Int) {
+        if (selectedSize == "") {
+            Toast.makeText(this, "Select size first!", Toast.LENGTH_SHORT).show()
+        } else {
+            selectedColor = name
+            binding.selectedColorText.visibility =View.VISIBLE
+            binding.selectedColorText.text = name
+            colorAdapter.updateFrame(position)
+            updatePrice()
+        }
+
+    }
+
+    // it will update price
+    @SuppressLint("SetTextI18n")
+    private fun updatePrice() {
+        /*
+            if color "" mean new size clicked or color not selected
+            then quantity button will disable
+            actual price will hide and price rang will visible
+        */
+        if (selectedColor == "") {
+            binding.qIncrease.isEnabled = false
+            binding.actPrice.visibility = View.GONE
+            binding.price.text = priceRange
+        } else {
+            // enable quantity button
+            binding.qIncrease.isEnabled = true
+            // storing current variant price on global variable
+            selectedVariantPrice = priceMap[selectedColor+selectedSize]!!
+            //setting variant price to price text
+            binding.price.text = "৳${selectedVariantPrice}"
+
+            // make fake actual price and making it visible
+            val actPrice = selectedVariantPrice + 50
+            binding.actPrice.paintFlags = binding.actPrice.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+            binding.actPrice.text = "৳$actPrice"
+            binding.actPrice.visibility = View.VISIBLE
+        }
     }
 
 

@@ -87,7 +87,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible">
-
         <include layout="@layout/shimmer_product_details" />
 
     </com.facebook.shimmer.ShimmerFrameLayout>
@@ -159,7 +158,7 @@
                     android:id="@+id/imageNext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/circle"
+                    android:background="@drawable/disable_circle"
                     android:src="@drawable/ic_arrow_right_24"
                     app:layout_constraintBottom_toBottomOf="@+id/product_image_list_section"
                     app:layout_constraintStart_toEndOf="@+id/product_image_list_section"
@@ -230,7 +229,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
-
                     android:orientation="vertical"
                     app:layout_constraintTop_toBottomOf="@id/social_section">
 
@@ -334,55 +332,52 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Size"
+                            android:text="Sizes"
                             android:textColor="@color/black"
                             android:textSize="14sp"
                             android:textStyle="bold" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="5dp"
                             android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/sizeM"
+                            <androidx.recyclerview.widget.RecyclerView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="15dp"
-                                android:background="@drawable/text_button"
-                                android:paddingStart="25dp"
-                                android:paddingTop="10dp"
-                                android:paddingEnd="25dp"
-                                android:paddingBottom="10dp"
-                                android:text="M"
-                                android:textColor="@color/black"
-                                android:textSize="14sp"
-                                android:textStyle="bold" />
+                                android:id="@+id/productSizes"
+                                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                                android:orientation="horizontal"/>
 
-                            <TextView
-                                android:id="@+id/sizeL"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/text_button"
-                                android:paddingStart="25dp"
-                                android:paddingTop="10dp"
-                                android:paddingEnd="25dp"
-                                android:paddingBottom="10dp"
-                                android:text="L"
-                                android:textColor="@color/black"
-                                android:textSize="14sp"
-                                android:textStyle="bold" />
+
+
                         </LinearLayout>
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:text="Color"
-                            android:textColor="@color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Colors"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/selected_color_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Colors"
+                                android:visibility="gone"
+                                android:layout_marginStart="10dp"
+                                android:textColor="@color/red"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -390,32 +385,13 @@
                             android:layout_marginTop="5dp"
                             android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/colorWihte"
+                            <androidx.recyclerview.widget.RecyclerView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="15dp"
-                                android:background="@drawable/text_button"
-                                android:paddingStart="25dp"
-                                android:paddingTop="10dp"
-                                android:paddingEnd="25dp"
-                                android:paddingBottom="10dp"
-                                android:text="White"
-                                android:textColor="@color/black"
-                                android:textSize="14sp" />
+                                android:id="@+id/productColors"
+                                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                                android:orientation="horizontal"/>
 
-                            <TextView
-                                android:id="@+id/colorBlack"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/text_button"
-                                android:paddingStart="25dp"
-                                android:paddingTop="10dp"
-                                android:paddingEnd="25dp"
-                                android:paddingBottom="10dp"
-                                android:text="Black"
-                                android:textColor="@color/black"
-                                android:textSize="14sp" />
                         </LinearLayout>
 
                         <TextView
@@ -424,7 +400,7 @@
                             android:layout_marginTop="16dp"
                             android:text="Quantity"
                             android:textColor="@color/black"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
 
                         <LinearLayout

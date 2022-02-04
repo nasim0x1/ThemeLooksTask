@@ -15,12 +15,10 @@ import java.io.File
 
 class Constants {
     companion object {
-        val colors = arrayOf("Black", "White")
-        val sizes = arrayOf("M", "L")
-
+        // Database reference
         val dbRef: DatabaseReference = FirebaseDatabase.getInstance().reference.child("products")
 
-
+        // extracting file name from file URI
         @SuppressLint("Range", "Recycle")
         fun getFileName(applicationContext: Application, uri: Uri?): String {
             var result: String? = null
@@ -45,7 +43,11 @@ class Constants {
             return result
         }
 
+        // formatting price range from all variants
         fun getPriceRange(variants: List<ProductVariant>): String {
+            if (variants.size == 1){
+                return "৳${variants[0].price}"
+            }
             var min = 0f
             var max = 0f
             if (variants.isNotEmpty() && variants.size > 1) {

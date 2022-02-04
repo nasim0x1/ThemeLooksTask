@@ -21,7 +21,6 @@
                 android:background="#f1f1f1"
                 android:clickable="false"
                 android:scaleType="centerInside"
-                android:transitionName="photoToAnimate"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

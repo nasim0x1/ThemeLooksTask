@@ -10,6 +10,7 @@
 
     <color name="orange">#FFA500</color>
     <color name="main">#FF5733</color>
+    <color name="red">#E91E63</color>
 
     <color name="shimmer_placeholder">#dddddd</color>
     <color name="appBarColor">#FFFFFF</color>

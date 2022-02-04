@@ -6,12 +6,11 @@ import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 import themelooks.test.task.databinding.ActivityUserHomeBinding
-import themelooks.test.task.ui.adaper.ProductListAdapter
+import themelooks.test.task.ui.adapter.ProductListAdapter
 import themelooks.test.task.ui.viewmodel.UserHomeViewModel
 import themelooks.test.task.util.Task
 
@@ -72,6 +71,7 @@ class UserHome : AppCompatActivity() {
         binding.refresher.setOnRefreshListener {
             viewModel.loadProduct()
         }
+        // calling viewmodel function to get product list
         viewModel.loadProduct()
     }
 

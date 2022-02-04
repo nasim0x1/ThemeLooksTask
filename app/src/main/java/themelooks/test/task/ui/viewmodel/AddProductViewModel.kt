@@ -29,7 +29,7 @@ class AddProductViewModel(application: Application) : AndroidViewModel(applicati
 
     val upLoadedImageLinks: LiveData<Task<List<String>>>
         get() = _upLoadedImageLinks
-    val status: LiveData<Task<Boolean>>
+    val productInfoSaveStatus: LiveData<Task<Boolean>>
         get() = _dbStatus
 
 }
